@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS UTILISATEURS(
 	email_utilisateur VARCHAR(100) NOT NULL,
 	pseudo_utilisateur VARCHAR(25) NOT NULL,
 	mot_de_passe_utilisateur VARCHAR(60) NOT NULL,
-	photo_profil_utilisateur VARCHAR(100) NOT NULL,
+	photo_profil_utilisateur VARCHAR(100),
     id_role INT NOT NULL, 
 	FOREIGN KEY(id_role) REFERENCES roles(id_role)
 ) Engine=InnoDB;
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS FILMS(
 	id_film INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	titre_film VARCHAR(50) NOT NULL,
 	description_film TEXT NOT NULL,
-	affiche_film VARCHAR(50) NOT NULL,
+	affiche_film VARCHAR(255) NOT NULL,
 	lien_film VARCHAR(255) NOT NULL,
 	duree_film DOUBLE(5, 2) NOT NULL
 ) Engine=InnoDB;
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS SERIES(
 	id_serie INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	titre_serie VARCHAR(50) NOT NULL,
 	description_serie TEXT NOT NULL,
-	affiche_serie VARCHAR(50) NOT NULL,
+	affiche_serie VARCHAR(255) NOT NULL,
 	lien_serie VARCHAR(255) NOT NULL
 ) Engine=InnoDB;
 

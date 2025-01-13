@@ -19,3 +19,7 @@ class Serie extends Content {
         return "<p>Film: {$this->getTitre()} ({$this->duree} min)</p>";
     }
 }
+
+
+
+//    $query = $db->prepare("INSERT INTO `series` (`id_serie`, `titre_serie`, `description_serie`, `affiche_serie`, `lien_serie`) VALUES (NULL, 'abc', 'abc', 'abc', 'abc')");

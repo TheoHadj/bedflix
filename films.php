@@ -16,29 +16,45 @@ session_start();
 
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $categorie = $_POST['categorie'];
-    // var_dump($_POST);
-    // echo var_dump($categorie);
-    if (isset($_POST['categorie'])) {
-        if($_POST['categorie'] == "*"){            
-            $query = $db->prepare('SELECT * FROM categories');
-            $query->execute();
-            $categories = $query->fetchAll(PDO::FETCH_ASSOC);
-        }
-        else{
-
-            $query = $db->prepare("
-            SELECT films.* 
-            FROM films 
-            INNER JOIN films_categories ON films.id_film = films_categories.id_film 
-            WHERE films_categories.id_categorie = :id_categorie
-            ");
-            $query->execute(['id_categorie' => $categorie]);
-            $films = $query->fetchAll(PDO::FETCH_ASSOC);
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $categorie = $_GET['categorie'];
+    $req = $_GET['REQUEST'];
+    var_dump($_GET);
     
+    if ($req == 'UPDATE') {
+        $query = $db->prepare("UPDATE `films` SET `titre_film` = 'Inceptione' WHERE `films`.`id_film` = :id");
+        $query->execute(['id' => (int)$_GET['film_id']]);
     }
+    else if ($req == 'DELETE') {
+        $query = $db->prepare("DELETE FROM films WHERE `films`.`id_film` = :id ");
+        $query->execute(['id' => (int)$_GET['film_id']]);
+    }
+    else{
+        if (isset($_GET['categorie'])) {
+            if($_GET['categorie'] == "*"){            
+                $query = $db->prepare('SELECT * FROM categories');
+                $query->execute();
+                $categories = $query->fetchAll(PDO::FETCH_ASSOC);
+            }
+            else{
+                
+                $query = $db->prepare("
+                SELECT films.* 
+                FROM films 
+                INNER JOIN films_categories ON films.id_film = films_categories.id_film 
+                WHERE films_categories.id_categorie = :id_categorie
+                ");
+                $query->execute(['id_categorie' => $categorie]);
+                $films = $query->fetchAll(PDO::FETCH_ASSOC);
+            }
+            
+        }
+    }
+}
+else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $query = $db->prepare("INSERT INTO FILMS (titre_film, description_film, affiche_film, lien_film, duree_film) VALUES (:titre, :description, 'inception.jpg', 'https://stream.bedflix/:titre', '2heures')");
+    var_dump($_POST);
+    $query->execute(['titre' => $_POST['titre'],'description' => $_POST['description']]);
 }
 
 
@@ -125,13 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 30px;
         }
 
-        .film-gallery {
+        .films-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
 
-        .film-card {
+        .films-card {
             background-color: #1e1e1e; /* Fond sombre pour les cartes */
             border-radius: 10px;
             padding: 15px;
@@ -139,24 +155,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
         }
 
-        .film-card img {
-            width: 100%;
-            height: auto;
+        .films-card img {
+            /* width: 100%;
+            height: auto; */
             border-radius: 10px;
         }
 
-        .film-card h2 {
+        .films-card h2 {
             font-size: 1.2em;
             margin: 10px 0;
         }
 
-        .film-card p {
+        .films-card p {
             margin: 5px 0;
             font-size: 0.9em;
             color: #d3d3d3;
         }
 
-        .film-card a.watch-btn {
+        .films-card a.watch-btn {
             display: inline-block;
             margin-top: 10px;
             padding: 10px 20px;
@@ -167,10 +183,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: background-color 0.3s;
         }
 
-        .film-card a.watch-btn:hover {
+        .films-card a.watch-btn:hover {
             background-color: #0056b3;
         }
-
 
         .filter-container {
             margin: 20px auto;
@@ -183,6 +198,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .filter-container h2 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            color: #f5f5f5;
+        }
+
+
+        .filter-container input {
             margin-bottom: 15px;
             font-size: 1.5em;
             color: #f5f5f5;
@@ -229,8 +251,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
 
+        .films-card button {
+            display: flex;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .films-card button:hover {
+            background-color: #0056b3;
+        }
 
 
+        /* .films-card button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .films-card a.watch-btn:hover {
+            background-color: #0056b3;
+        } */
+
+        
     </style>
 </head>
 <body>
@@ -252,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="filter-container">
             <h2>Filtrer par Catégories</h2>
-            <form method="POST" >
+            <form method="GET" >
                 <div class="form-group">
                     <label for="categorie">Catégorie</label>
                     <select name="categorie" id="categorie">
@@ -271,17 +323,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         
         
-        <div class="film-gallery">
+        <div class="films-gallery">
             <?php foreach ($films as $film): ?>
-                <div class="film-card">
+                <div class="films-card">
                     <img src="<?php echo "images/" . htmlspecialchars($film['affiche_film']); ?>" width="400" height="500" alt="Affiche du film">
                     <h2><?php echo htmlspecialchars($film['titre_film']); ?></h2>
                     <p><?php echo htmlspecialchars($film['description_film']); ?></p>
                     <p>Durée : <?php echo htmlspecialchars($film['duree_film']); ?> minutes</p>
                     <a href="<?php echo htmlspecialchars($film['lien_film']); ?>" target="_blank" class="watch-btn">Regarder</a>
+                    <form method="GET" style="display:inline;">
+                        <input type="hidden" name="REQUEST" value="UPDATE">
+                        <input type="hidden" name="film_id" value="<?php echo htmlspecialchars($film['id_film']); ?>">
+                        <button type="submit">Modifier</button>
+                    </form>
+                    <form method="GET" style="display:inline;">
+                        <input type="hidden" name="REQUEST" value="DELETE">
+                        <input type="hidden" name="film_id" value="<?php echo htmlspecialchars($film['id_film']); ?>">
+                        <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce film ?');">Supprimer</button>
+                    </form>
                 </div>
             <?php endforeach; ?>
+            
+            <div class="films-card">
+                <form method="POST" >
+                    <img src="images/ajout.png" width="400" height="500" alt="Affiche de la série" (click)=add>
+                    <h2> Nom du film </h2> 
+                    <input name="titre" type="text"></input>
+                    <p> Description du film </p> 
+                    <textarea name= "description" type="text"> </textarea>
+                    <button type="submit">Ajouter</button>
+                </form>
+                
+            </div>
+            
         </div>
+
     </main>
     </div>
 </body>
